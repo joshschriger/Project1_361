@@ -9,15 +9,16 @@ import java.util.Set;
 public class DFA implements DFAInterface {
 
 
-    private Set<Character> sigma;
-    private Set<DFAState> Q, F;
+    private final Set<Character> sigma;
+    private final Set<DFAState> Q;
+    private final Set<DFAState> F;
     private DFAState q0;
-    private HashMap<String, String> delta;
+    private final HashMap<String, DFAState> delta;
 
     public DFA() {
         Q = new HashSet<>(); // states
         sigma = new HashSet<>(); // alphabet
-        delta = new HashMap<String, String>(); // transition function
+        delta = new HashMap<>(); // transition function
         q0 = null; // start state
         F = new HashSet<>(); // final state
     }
@@ -51,8 +52,24 @@ public class DFA implements DFAInterface {
     public void addFinalState(String name) {
         DFAState newFinal = new DFAState(name);
         addState(name);
+        newFinal.toggleFinal();
         F.add(newFinal);
     }
+
+
+    /**
+     * Takes a String a returns a DFAState from Q, the set of states
+     *
+     * @return DFA state that's name matches the string or null
+     */
+    public DFAState stringToState(String s){
+        for (DFAState state: Q) {
+            if( s.equals(state.toString()))
+                return state;
+        }
+        return null;
+    }
+
 
     /**
      * Adds the transition to the DFA's delta data structure and builds the Alphabet, sigma
@@ -68,7 +85,8 @@ public class DFA implements DFAInterface {
         if (Q.toString().contains(fromState) && Q.toString().contains(toState)) {
             //builds Alphabet of the language
             sigma.add(onSymb);
-            delta.put(transition, toState);
+            DFAState value = stringToState(toState);
+            delta.put(transition, value);
         }
     }
 
@@ -118,11 +136,14 @@ public class DFA implements DFAInterface {
     public boolean accepts(String s) {
         DFAState currState = q0;
         for (int i = 0; i < s.length(); i++) {
+            //System.out.println(i); //debug
+            //System.out.println(s.charAt(i)); //debug
             currState = (DFAState) getToState(currState, s.charAt(i));
         }
 
-        if (F.contains(currState)) {
-            return true;
+        for (DFAState state : F){
+            if(state.getName().equals(currState.getName()))
+                return true;
         }
         return false;
     }
@@ -135,6 +156,9 @@ public class DFA implements DFAInterface {
      * @return the sink state.
      */
     public State getToState(DFAState from, char onSymb) {
+        if(onSymb == 'e'){
+            return from;
+        }
         return delta.get(from.toString() + onSymb);
     }
 
@@ -145,7 +169,12 @@ public class DFA implements DFAInterface {
      *
      * @return a copy of this DFA
      */
-    public DFA complement() {
+    public DFA complement() { //TODO this is not correct
+        for (DFAState state : Q) {
+            if(F.contains(state)){
+                state.toggleFinal();
+            }
+        }
         return null;
     }
 
@@ -153,25 +182,40 @@ public class DFA implements DFAInterface {
         StringBuilder builder = new StringBuilder();
 
         builder.append("Q = { ");
-        for (DFAState c : Q)
-            builder.append(c.toString() + " ");
+        for (DFAState s : Q)
+            builder.append(s.toString()).append(" ");
         builder.append("}\n");
 
         builder.append("Sigma = { ");
         for (char c : sigma)
-            builder.append(c + " ");
+            builder.append(c).append(" ");
         builder.append( "}\n");
 
-        builder.append("delta = \n"); //TODO print the table of delta like the one in the sample output
+        builder.append("delta = \n");
 
-        builder.append("q0 = " + getStartState() + "\n");
+        builder.append("\t\t\t\t");
+
+        for (char c : sigma)
+            builder.append(c).append("\t\t");
+        builder.append("\n");
+
+        for (DFAState s : Q) {
+            builder.append("\t\t");
+            builder.append(s.toString()).append("\t\t");
+            for (char c : sigma)
+                builder.append(getToState(s, c)).append("\t\t");
+            builder.append("\n");
+        }
+
+        builder.append("q0 = ").append(getStartState()).append("\n");
 
         builder.append("F = { ");
         for (DFAState c : F)
-            builder.append(c.toString() + " ");
+            builder.append(c.toString()).append(" ");
         builder.append("}\n");
 
         return builder.toString();
     }
 
 }
+//TODO reading in the states is in the wrong order
