@@ -9,18 +9,18 @@ import java.util.Set;
 
 public class DFA implements DFAInterface {
 
-    private Set<Character> sigma;
-    private Set<DFAState> Q;
-    private Set<DFAState> F;
-    private DFAState q0;
-    private HashMap<String, DFAState> delta;
+    private Set<Character> sigma;               // Alphabet
+    private Set<DFAState> Q;                    // states
+    private Set<DFAState> F;                    // final states
+    private DFAState q0;                        // start state
+    private HashMap<String, DFAState> delta;    // transition function
 
     public DFA() {
-        Q = new LinkedHashSet<>();          // states
-        sigma = new LinkedHashSet<>();      // alphabet
-        delta = new HashMap<>();            // transition function
-        q0 = null;                          // start state
-        F = new LinkedHashSet<>();          // final state
+        Q = new LinkedHashSet<>();
+        sigma = new LinkedHashSet<>();
+        delta = new HashMap<>();
+        q0 = null;
+        F = new LinkedHashSet<>();
     }
 
     /**
@@ -31,7 +31,8 @@ public class DFA implements DFAInterface {
     public void addStartState(String name) {
         q0 = new DFAState(name);
         q0.setAsStart();
-        Q.add(q0);
+        //addState(q0.getName()); // TODO: DON'T REMOVE - TESTING
+        Q.add(q0); // TESTING
     }
 
     /**
@@ -40,7 +41,10 @@ public class DFA implements DFAInterface {
      * @param name is the label of the state
      */
     public void addState(String name) {
-        Q.add(new DFAState(name));
+    // TODO: test 8 has one extra '2' in Q set
+        if(!Q.contains(getState(name))) {
+            Q.add(new DFAState(name));
+        }
     }
 
     /**
@@ -52,7 +56,8 @@ public class DFA implements DFAInterface {
         DFAState newFinal = new DFAState(name);
         newFinal.toggleFinal();
         F.add(newFinal);
-        Q.add(newFinal);
+        //addState(newFinal.getName()); // TODO: DON'T REMOVE - TESTING
+        Q.add(newFinal); // TESTING
     }
 
     // ****** HELPER METHODS ******
@@ -88,9 +93,8 @@ public class DFA implements DFAInterface {
 
         if (Q.toString().contains(fromState) && Q.toString().contains(toState)) {
             DFAState state = getState(toState);
-            delta.put(transition, state);
-            //builds Alphabet
-            sigma.add(onSymb);
+            delta.put(transition, state);   // adding transition
+            sigma.add(onSymb);              // builds Alphabet
         }
     }
 
@@ -140,15 +144,16 @@ public class DFA implements DFAInterface {
     public boolean accepts(String s) {
         DFAState currState = q0;
 
-//        for (int i = 0; i < s.length(); i++) {
-//            currState = (DFAState) getToState(currState, s.charAt(i));
-//        }
-
         for (int i = 0; i < s.length(); i++) {
-            if((DFAState) getToState(currState, s.charAt(i)) != null) {
-                currState = (DFAState) getToState(currState, s.charAt(i));
-            }
+            currState = (DFAState) getToState(currState, s.charAt(i));
         }
+
+        // TODO: DON'T DELETE, for some reason the for each loop breaks the complement
+//        for (DFAState state : F) {
+//            if (state.getName().equals(currState.getName())) {
+//                return true;
+//            }
+//        }
 
         if(F.contains(currState)) {
             return true;
@@ -168,7 +173,8 @@ public class DFA implements DFAInterface {
         if (onSymb == 'e') {
             return from;
         }
-        return delta.get(from.toString() + onSymb);
+
+        return delta.get(from.getName() + onSymb);
     }
 
     /**
@@ -179,61 +185,57 @@ public class DFA implements DFAInterface {
      * @return a copy of this DFA
      */
     public DFA complement() {
-        DFA tempDFA = new DFA();
+        DFA C_DFA = new DFA();
 
-        tempDFA.Q = this.Q;
-        tempDFA.q0 = this.q0;
-        tempDFA.sigma = this.sigma;
-        tempDFA.delta = this.delta;
+        C_DFA.Q = this.Q;           // same states
+        C_DFA.q0 = this.q0;         // same start state
+        C_DFA.sigma = this.sigma;   // same Alphabet
+        C_DFA.delta = this.delta;   // same transitions
 
-        //System.out.println(F); //debug
-        //System.out.println(tempDFA.F); //debug
-
+        // change final states
         for (DFAState s : Q) {
             if (!F.contains(s)) {
-                tempDFA.F.add(s);
+                C_DFA.F.add(s);
             }
         }
 
-        //System.out.println(tempDFA.F); //debug
-
-        return tempDFA;
+        return C_DFA;
     }
 
     public String toString() {
-        StringBuilder builder = new StringBuilder();
+        StringBuilder sb = new StringBuilder();
 
-        builder.append("Q = { ");
+        sb.append("Q = { ");
         for (DFAState s : Q)
-            builder.append(s.toString()).append(" ");
-        builder.append("}\n");
+            sb.append(s.toString()).append(" ");
+        sb.append("}\n");
 
-        builder.append("Sigma = { ");
+        sb.append("Sigma = { ");
         for (char c : sigma)
-            builder.append(c).append(" ");
-        builder.append("}\n");
+            sb.append(c).append(" ");
+        sb.append("}\n");
 
-        builder.append("delta = \n\t\t\t\t");
+        sb.append("delta = \n\t\t\t\t");
 
         for (char c : sigma)
-            builder.append(c).append("\t\t");
-        builder.append("\n");
+            sb.append(c).append("\t\t");
+        sb.append("\n");
 
         for (DFAState s : Q) {
-            builder.append("\t\t");
-            builder.append(s.toString()).append("\t\t");
+            sb.append("\t\t");
+            sb.append(s.toString()).append("\t\t");
             for (char c : sigma)
-                builder.append(getToState(s, c)).append("\t\t");
-            builder.append("\n");
+                sb.append(getToState(s, c)).append("\t\t");
+            sb.append("\n");
         }
 
-        builder.append("q0 = ").append(getStartState()).append("\n");
+        sb.append("q0 = ").append(getStartState()).append("\n");
 
-        builder.append("F = { ");
+        sb.append("F = { ");
         for (DFAState c : F)
-            builder.append(c.toString()).append(" ");
-        builder.append("}\n");
+            sb.append(c.toString()).append(" ");
+        sb.append("}\n");
 
-        return builder.toString();
+        return sb.toString();
     }
 }
