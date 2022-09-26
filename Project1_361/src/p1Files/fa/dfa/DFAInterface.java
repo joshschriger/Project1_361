@@ -23,7 +23,7 @@ public interface DFAInterface extends FAInterface {
      *
      * @return String representation of the DFA
      */
-	String toString();
+    String toString();
 
     /**
      * Simulates a DFA on input s to determine
@@ -32,7 +32,7 @@ public interface DFAInterface extends FAInterface {
      * @param s - the input string
      * @return true if s in the language of the DFA and false otherwise
      */
-	boolean accepts(String s);
+    boolean accepts(String s);
 
     /**
      * Uses transition function delta of FA
@@ -41,7 +41,7 @@ public interface DFAInterface extends FAInterface {
      * @param onSymb the label of the transition
      * @return the sink state.
      */
-	State getToState(DFAState from, char onSymb);
+    State getToState(DFAState from, char onSymb);
 
     /**
      * Computes a copy of this DFA
@@ -50,6 +50,6 @@ public interface DFAInterface extends FAInterface {
      *
      * @return a copy of this DFA
      */
-	DFA complement();
+    DFA complement();
 
 }

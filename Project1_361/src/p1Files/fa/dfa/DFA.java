@@ -9,11 +9,11 @@ import java.util.Set;
 
 public class DFA implements DFAInterface {
 
-    private final Set<Character> sigma;
-    private final Set<DFAState> Q;
+    private Set<Character> sigma;
+    private Set<DFAState> Q;
     private final Set<DFAState> F;
     private DFAState q0;
-    private final HashMap<String, DFAState> delta;
+    private HashMap<String, DFAState> delta;
 
     public DFA() {
         Q = new LinkedHashSet<>(); // states
@@ -170,54 +170,64 @@ public class DFA implements DFAInterface {
      *
      * @return a copy of this DFA
      */
-    public DFA complement() { //TODO this is not correct
-        DFA compDFA = new DFA();
-        compDFA.addStartState(q0.getName());
-        for (DFAState state : Q) {
-            DFAState stateCpy = new DFAState(state.getName());
+    public DFA complement() {
+        DFA tempDFA = new DFA();
 
-            compDFA.addState(stateCpy.getName());
-            if (!F.contains(stateCpy)) {
-                stateCpy.toggleFinal();
+        tempDFA.Q = this.Q;
+        tempDFA.q0 = this.q0;
+        tempDFA.sigma = this.sigma;
+        tempDFA.delta = this.delta;
+        System.out.println(F);
+        System.out.println(tempDFA.F);
+
+
+        tempDFA.F.clear();
+        //TODO this is adding all states rather than just the complement of the original, everything else is working
+        for (DFAState s : Q) {
+            if (!F.contains(s)) {
+                tempDFA.F.add(s);
             }
         }
-        return compDFA;
+
+        //System.out.println(tempDFA); //debug
+
+        return tempDFA;
     }
 
     public String toString() {
-        StringBuilder builder = new StringBuilder();
+        StringBuilder sb = new StringBuilder();
 
-        builder.append("Q = { ");
+        sb.append("Q = { ");
         for (DFAState s : Q)
-            builder.append(s.toString()).append(" ");
-        builder.append("}\n");
+            sb.append(s.toString()).append(" ");
+        sb.append("}\n");
 
-        builder.append("Sigma = { ");
+        sb.append("Sigma = { ");
         for (char c : sigma)
-            builder.append(c).append(" ");
-        builder.append("}\n");
+            sb.append(c).append(" ");
+        sb.append("}\n");
 
-        builder.append("delta = \n\t\t\t\t");
+        sb.append("delta = \n\t\t\t\t");
 
         for (char c : sigma)
-            builder.append(c).append("\t\t");
-        builder.append("\n");
+            sb.append(c).append("\t\t");
+        sb.append("\n");
 
         for (DFAState s : Q) {
-            builder.append("\t\t");
-            builder.append(s.toString()).append("\t\t");
+            sb.append("\t\t");
+            sb.append(s.toString()).append("\t\t");
             for (char c : sigma)
-                builder.append(getToState(s, c)).append("\t\t");
-            builder.append("\n");
+                sb.append(getToState(s, c)).append("\t\t");
+            sb.append("\n");
         }
 
-        builder.append("q0 = ").append(getStartState()).append("\n");
+        sb.append("q0 = ").append(getStartState()).append("\n");
 
-        builder.append("F = { ");
+        sb.append("F = { ");
         for (DFAState c : F)
-            builder.append(c.toString()).append(" ");
-        builder.append("}\n");
+            sb.append(c.toString()).append(" ");
+        sb.append("}\n");
 
-        return builder.toString();
+        return sb.toString();
     }
 }

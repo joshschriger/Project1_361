@@ -67,9 +67,9 @@ public class DFADriver {
                 String input = scan.nextLine();
                 boolean accepts = dfa.accepts(input);
                 System.out.print(accepts ? "yes\t" : "no\t");
-//					boolean acceptsC = dfaC.accepts(input);
-//					//since their languages are complementing their answers must be opposites
-//					System.out.println(acceptsC?"yes":"no");
+                boolean acceptsC = dfaC.accepts(input);
+                //since their languages are complementing their answers must be opposites
+                System.out.println(acceptsC ? "yes" : "no");
             }
             scan.close();
         } else {

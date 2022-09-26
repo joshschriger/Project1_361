@@ -10,21 +10,21 @@ public interface FAInterface {
      *
      * @param name is the label of the start state
      */
-	void addStartState(String name);
+    void addStartState(String name);
 
     /**
      * Adds a non-final, not initial state to the DFA instance
      *
      * @param name is the label of the state
      */
-	void addState(String name);
+    void addState(String name);
 
     /**
      * Adds a final state to the DFA
      *
      * @param name is the label of the state
      */
-	void addFinalState(String name);
+    void addFinalState(String name);
 
 
     /**
@@ -34,36 +34,36 @@ public interface FAInterface {
      * @param onSymb    is the symbol from the DFA's alphabet.
      * @param toState   is the label of the state where the transition ends
      */
-	void addTransition(String fromState, char onSymb,
-					   String toState);
+    void addTransition(String fromState, char onSymb,
+                       String toState);
 
     /**
      * Getter for Q
      *
      * @return a set of states that FA has
      */
-	Set<? extends State> getStates();
+    Set<? extends State> getStates();
 
     /**
      * Getter for F
      *
      * @return a set of final states that FA has
      */
-	Set<? extends State> getFinalStates();
+    Set<? extends State> getFinalStates();
 
     /**
      * Getter for q0
      *
      * @return the start state of FA
      */
-	State getStartState();
+    State getStartState();
 
     /**
      * Getter for Sigma
      *
      * @return the alphabet of FA
      */
-	Set<Character> getABC();
+    Set<Character> getABC();
 
 
 }

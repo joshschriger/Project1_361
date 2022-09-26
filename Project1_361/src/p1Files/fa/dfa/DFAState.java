@@ -2,8 +2,6 @@ package p1Files.fa.dfa;
 
 import p1Files.fa.State;
 
-import java.util.HashMap;
-
 public class DFAState extends State {
 
     private boolean startState, finalState;
@@ -18,12 +16,12 @@ public class DFAState extends State {
         startState = true;
     }
 
-    protected boolean isStartState() {
-        return startState;
+    protected boolean isFinal() {
+        return finalState;
     }
 
     protected void toggleFinal() {
-        finalState = !finalState;
+        finalState = !isFinal();
     }
 
 }
