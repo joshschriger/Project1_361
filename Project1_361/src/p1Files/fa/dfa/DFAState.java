@@ -6,21 +6,23 @@ import java.util.HashMap;
 
 public class DFAState extends State {
 
-
     private boolean startState, finalState;
 
     public DFAState(String name) {
         super.name = name;
         startState = false;
         finalState = false;
-        HashMap<Character, DFAState> transitions = new HashMap<>();
     }
 
-    public void setAsStart() {
+    protected void setAsStart() {
         startState = true;
     }
 
-    public void toggleFinal() {
+    protected boolean isStartState() {
+        return startState;
+    }
+
+    protected void toggleFinal() {
         finalState = !finalState;
     }
 
