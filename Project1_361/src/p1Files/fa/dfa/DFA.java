@@ -2,25 +2,22 @@ package p1Files.fa.dfa;
 
 import p1Files.fa.State;
 
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Set;
+import java.util.*;
 
 public class DFA implements DFAInterface {
 
 
-    private final Set<Character> sigma;
-    private final Set<DFAState> Q;
-    private final Set<DFAState> F;
+    private Set<Character> sigma;
+    private Set<DFAState> Q, F;
     private DFAState q0;
-    private final HashMap<String, DFAState> delta;
+    private HashMap<Character, DFAState> delta;
 
     public DFA() {
-        Q = new HashSet<>(); // states
-        sigma = new HashSet<>(); // alphabet
-        delta = new HashMap<>(); // transition function
-        q0 = null; // start state
-        F = new HashSet<>(); // final state
+        Q = new LinkedHashSet<>();        // states
+        sigma = new LinkedHashSet<>();    // alphabet
+        delta = new HashMap<>();          // transition function
+        q0 = null;                        // start state
+        F = new LinkedHashSet<>();        // final state
     }
 
     /**
@@ -29,10 +26,9 @@ public class DFA implements DFAInterface {
      * @param name is the label of the start state
      */
     public void addStartState(String name) {
-        addState(name);
         q0 = new DFAState(name);
         q0.setAsStart();
-
+        Q.add(q0);
     }
 
     /**
@@ -51,24 +47,28 @@ public class DFA implements DFAInterface {
      */
     public void addFinalState(String name) {
         DFAState newFinal = new DFAState(name);
-        addState(name);
         newFinal.toggleFinal();
         F.add(newFinal);
+        Q.add(newFinal);
     }
 
 
+    // ***** HELPER METHODS *****
+
     /**
-     * Takes a String a returns a DFAState from Q, the set of states
+     * Takes a String 'name' and returns a DFAState from Q, the set of states
      *
-     * @return DFA state that's name matches the string or null
+     * @return DFA state that's name matches the string or null if not found
      */
-    public DFAState stringToState(String s){
+    private DFAState getState(String name){
         for (DFAState state: Q) {
-            if( s.equals(state.toString()))
+            if(state.getName().equals(name))
                 return state;
         }
         return null;
     }
+
+    // ***** HELPER METHODS *****
 
 
     /**
@@ -79,14 +79,11 @@ public class DFA implements DFAInterface {
      * @param toState   is the label of the state where the transition ends
      */
     public void addTransition(String fromState, char onSymb, String toState) {
-        // reads from the input file, line 4
-        String transition = fromState + onSymb;
-
-        if (Q.toString().contains(fromState) && Q.toString().contains(toState)) {
-            //builds Alphabet of the language
-            sigma.add(onSymb);
-            DFAState value = stringToState(toState);
-            delta.put(transition, value);
+        for(DFAState curr : Q) {
+            if(curr.getName().equals(fromState)) {
+                delta.put(onSymb, getState(toState)); // mapping state to symbol (transition)
+                sigma.add(onSymb); // building the alphabet
+            }
         }
     }
 
@@ -136,8 +133,6 @@ public class DFA implements DFAInterface {
     public boolean accepts(String s) {
         DFAState currState = q0;
         for (int i = 0; i < s.length(); i++) {
-            //System.out.println(i); //debug
-            //System.out.println(s.charAt(i)); //debug
             currState = (DFAState) getToState(currState, s.charAt(i));
         }
 
@@ -157,9 +152,9 @@ public class DFA implements DFAInterface {
      */
     public State getToState(DFAState from, char onSymb) {
         if(onSymb == 'e'){
-            return from;
+            return from; // maybe return null?
         }
-        return delta.get(from.toString() + onSymb);
+        return delta.get(onSymb);
     }
 
     /**
@@ -178,44 +173,52 @@ public class DFA implements DFAInterface {
         return null;
     }
 
-    public String toString() {
+    public String toString() { //TODO reading in the states is in the wrong order
         StringBuilder builder = new StringBuilder();
 
+        // Q
         builder.append("Q = { ");
-        for (DFAState s : Q)
-            builder.append(s.toString()).append(" ");
+        for (DFAState s : Q) {
+            builder.append(s.getName()).append(" ");
+        }
         builder.append("}\n");
 
+        // sigma
         builder.append("Sigma = { ");
-        for (char c : sigma)
+        for (char c : sigma) {
             builder.append(c).append(" ");
-        builder.append( "}\n");
+        }
+        builder.append("}\n");
 
+        // delta
         builder.append("delta = \n");
-
         builder.append("\t\t\t\t");
 
-        for (char c : sigma)
+        for (char c : sigma) {
             builder.append(c).append("\t\t");
+        }
         builder.append("\n");
 
         for (DFAState s : Q) {
             builder.append("\t\t");
             builder.append(s.toString()).append("\t\t");
-            for (char c : sigma)
+            for (char c : sigma) {
                 builder.append(getToState(s, c)).append("\t\t");
+            }
             builder.append("\n");
         }
 
+        // q0
         builder.append("q0 = ").append(getStartState()).append("\n");
 
+        // F
         builder.append("F = { ");
-        for (DFAState c : F)
+        for (DFAState c : F) {
             builder.append(c.toString()).append(" ");
+        }
         builder.append("}\n");
 
         return builder.toString();
     }
 
 }
-//TODO reading in the states is in the wrong order
