@@ -11,16 +11,16 @@ public class DFA implements DFAInterface {
 
     private Set<Character> sigma;
     private Set<DFAState> Q;
-    private final Set<DFAState> F;
+    private Set<DFAState> F;
     private DFAState q0;
     private HashMap<String, DFAState> delta;
 
     public DFA() {
-        Q = new LinkedHashSet<>(); // states
-        sigma = new LinkedHashSet<>(); // alphabet
-        delta = new HashMap<>(); // transition function
-        q0 = null; // start state
-        F = new LinkedHashSet<>(); // final state
+        Q = new LinkedHashSet<>();          // states
+        sigma = new LinkedHashSet<>();      // alphabet
+        delta = new HashMap<>();            // transition function
+        q0 = null;                          // start state
+        F = new LinkedHashSet<>();          // final state
     }
 
     /**
@@ -29,10 +29,9 @@ public class DFA implements DFAInterface {
      * @param name is the label of the start state
      */
     public void addStartState(String name) {
-        addState(name);
         q0 = new DFAState(name);
         q0.setAsStart();
-
+        Q.add(q0);
     }
 
     /**
@@ -51,24 +50,29 @@ public class DFA implements DFAInterface {
      */
     public void addFinalState(String name) {
         DFAState newFinal = new DFAState(name);
-        addState(name);
         newFinal.toggleFinal();
         F.add(newFinal);
+        Q.add(newFinal);
     }
 
+    // ****** HELPER METHODS ******
 
     /**
-     * Takes a String a returns a DFAState from Q, the set of states
+     * Looks for the specified DFAState in Q, the set of states
      *
-     * @return DFA state that's name matches the string or null
+     * @param name is the label of the state we're looking for
+     * @return DFAState that's name matches the string or null
      */
-    public DFAState stringToState(String s) {
+    private DFAState getState(String name) {
         for (DFAState state : Q) {
-            if (s.equals(state.toString()))
+            if (state.getName().equals(name)) {
                 return state;
+            }
         }
         return null;
     }
+
+    // ****** HELPER METHODS ******
 
 
     /**
@@ -83,10 +87,10 @@ public class DFA implements DFAInterface {
         String transition = fromState + onSymb;
 
         if (Q.toString().contains(fromState) && Q.toString().contains(toState)) {
-            //builds Alphabet of the language
+            DFAState state = getState(toState);
+            delta.put(transition, state);
+            //builds Alphabet
             sigma.add(onSymb);
-            DFAState value = stringToState(toState);
-            delta.put(transition, value);
         }
     }
 
@@ -135,17 +139,21 @@ public class DFA implements DFAInterface {
      */
     public boolean accepts(String s) {
         DFAState currState = q0;
-        for (int i = 0; i < s.length(); i++) {
-            //System.out.println(i); //debug
-            //System.out.println(s.charAt(i)); //debug
-            currState = (DFAState) getToState(currState, s.charAt(i));
-        }
 
-        for (DFAState state : F) {
-            if (state.getName().equals(currState.getName())) {
-                return true;
+//        for (int i = 0; i < s.length(); i++) {
+//            currState = (DFAState) getToState(currState, s.charAt(i));
+//        }
+
+        for (int i = 0; i < s.length(); i++) {
+            if((DFAState) getToState(currState, s.charAt(i)) != null) {
+                currState = (DFAState) getToState(currState, s.charAt(i));
             }
         }
+
+        if(F.contains(currState)) {
+            return true;
+        }
+
         return false;
     }
 
@@ -177,57 +185,55 @@ public class DFA implements DFAInterface {
         tempDFA.q0 = this.q0;
         tempDFA.sigma = this.sigma;
         tempDFA.delta = this.delta;
-        System.out.println(F);
-        System.out.println(tempDFA.F);
 
+        //System.out.println(F); //debug
+        //System.out.println(tempDFA.F); //debug
 
-        tempDFA.F.clear();
-        //TODO this is adding all states rather than just the complement of the original, everything else is working
         for (DFAState s : Q) {
             if (!F.contains(s)) {
                 tempDFA.F.add(s);
             }
         }
 
-        //System.out.println(tempDFA); //debug
+        //System.out.println(tempDFA.F); //debug
 
         return tempDFA;
     }
 
     public String toString() {
-        StringBuilder sb = new StringBuilder();
+        StringBuilder builder = new StringBuilder();
 
-        sb.append("Q = { ");
+        builder.append("Q = { ");
         for (DFAState s : Q)
-            sb.append(s.toString()).append(" ");
-        sb.append("}\n");
+            builder.append(s.toString()).append(" ");
+        builder.append("}\n");
 
-        sb.append("Sigma = { ");
+        builder.append("Sigma = { ");
         for (char c : sigma)
-            sb.append(c).append(" ");
-        sb.append("}\n");
+            builder.append(c).append(" ");
+        builder.append("}\n");
 
-        sb.append("delta = \n\t\t\t\t");
+        builder.append("delta = \n\t\t\t\t");
 
         for (char c : sigma)
-            sb.append(c).append("\t\t");
-        sb.append("\n");
+            builder.append(c).append("\t\t");
+        builder.append("\n");
 
         for (DFAState s : Q) {
-            sb.append("\t\t");
-            sb.append(s.toString()).append("\t\t");
+            builder.append("\t\t");
+            builder.append(s.toString()).append("\t\t");
             for (char c : sigma)
-                sb.append(getToState(s, c)).append("\t\t");
-            sb.append("\n");
+                builder.append(getToState(s, c)).append("\t\t");
+            builder.append("\n");
         }
 
-        sb.append("q0 = ").append(getStartState()).append("\n");
+        builder.append("q0 = ").append(getStartState()).append("\n");
 
-        sb.append("F = { ");
+        builder.append("F = { ");
         for (DFAState c : F)
-            sb.append(c.toString()).append(" ");
-        sb.append("}\n");
+            builder.append(c.toString()).append(" ");
+        builder.append("}\n");
 
-        return sb.toString();
+        return builder.toString();
     }
 }
