@@ -3,11 +3,11 @@ package p1Files.fa.dfa;
 import p1Files.fa.State;
 
 import java.util.HashMap;
-import java.util.HashSet;
+import java.util.LinkedHashSet;
 import java.util.Set;
 
-public class DFA implements DFAInterface {
 
+public class DFA implements DFAInterface {
 
     private final Set<Character> sigma;
     private final Set<DFAState> Q;
@@ -16,11 +16,11 @@ public class DFA implements DFAInterface {
     private final HashMap<String, DFAState> delta;
 
     public DFA() {
-        Q = new HashSet<>(); // states
-        sigma = new HashSet<>(); // alphabet
+        Q = new LinkedHashSet<>(); // states
+        sigma = new LinkedHashSet<>(); // alphabet
         delta = new HashMap<>(); // transition function
         q0 = null; // start state
-        F = new HashSet<>(); // final state
+        F = new LinkedHashSet<>(); // final state
     }
 
     /**
@@ -62,9 +62,9 @@ public class DFA implements DFAInterface {
      *
      * @return DFA state that's name matches the string or null
      */
-    public DFAState stringToState(String s){
-        for (DFAState state: Q) {
-            if( s.equals(state.toString()))
+    public DFAState stringToState(String s) {
+        for (DFAState state : Q) {
+            if (s.equals(state.toString()))
                 return state;
         }
         return null;
@@ -141,9 +141,10 @@ public class DFA implements DFAInterface {
             currState = (DFAState) getToState(currState, s.charAt(i));
         }
 
-        for (DFAState state : F){
-            if(state.getName().equals(currState.getName()))
+        for (DFAState state : F) {
+            if (state.getName().equals(currState.getName())) {
                 return true;
+            }
         }
         return false;
     }
@@ -156,7 +157,7 @@ public class DFA implements DFAInterface {
      * @return the sink state.
      */
     public State getToState(DFAState from, char onSymb) {
-        if(onSymb == 'e'){
+        if (onSymb == 'e') {
             return from;
         }
         return delta.get(from.toString() + onSymb);
@@ -170,12 +171,17 @@ public class DFA implements DFAInterface {
      * @return a copy of this DFA
      */
     public DFA complement() { //TODO this is not correct
+        DFA compDFA = new DFA();
+        compDFA.addStartState(q0.getName());
         for (DFAState state : Q) {
-            if(F.contains(state)){
-                state.toggleFinal();
+            DFAState stateCpy = new DFAState(state.getName());
+
+            compDFA.addState(stateCpy.getName());
+            if (!F.contains(stateCpy)) {
+                stateCpy.toggleFinal();
             }
         }
-        return null;
+        return compDFA;
     }
 
     public String toString() {
@@ -189,11 +195,9 @@ public class DFA implements DFAInterface {
         builder.append("Sigma = { ");
         for (char c : sigma)
             builder.append(c).append(" ");
-        builder.append( "}\n");
+        builder.append("}\n");
 
-        builder.append("delta = \n");
-
-        builder.append("\t\t\t\t");
+        builder.append("delta = \n\t\t\t\t");
 
         for (char c : sigma)
             builder.append(c).append("\t\t");
@@ -216,6 +220,4 @@ public class DFA implements DFAInterface {
 
         return builder.toString();
     }
-
 }
-//TODO reading in the states is in the wrong order

@@ -10,7 +10,7 @@ public class DFAState extends State {
     private boolean startState, finalState;
 
     public DFAState(String name) {
-        super.name  = name;
+        super.name = name;
         startState = false;
         finalState = false;
         HashMap<Character, DFAState> transitions = new HashMap<>();
