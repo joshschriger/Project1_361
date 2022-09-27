@@ -11,7 +11,7 @@ public class DFA implements DFAInterface {
 
     private Set<Character> sigma;               // Alphabet
     private Set<DFAState> Q;                    // states
-    private Set<DFAState> F;                    // final states
+    private final Set<DFAState> F;              // final states
     private DFAState q0;                        // start state
     private HashMap<String, DFAState> delta;    // transition function
 
@@ -30,9 +30,7 @@ public class DFA implements DFAInterface {
      */
     public void addStartState(String name) {
         q0 = new DFAState(name);
-        q0.setAsStart();
-        //addState(q0.getName()); // TODO: DON'T REMOVE - TESTING
-        Q.add(q0); // TESTING
+        addState(name);
     }
 
     /**
@@ -41,8 +39,7 @@ public class DFA implements DFAInterface {
      * @param name is the label of the state
      */
     public void addState(String name) {
-    // TODO: test 8 has one extra '2' in Q set
-        if(!Q.contains(getState(name))) {
+        if (!Q.contains(getState(name))) {
             Q.add(new DFAState(name));
         }
     }
@@ -54,10 +51,10 @@ public class DFA implements DFAInterface {
      */
     public void addFinalState(String name) {
         DFAState newFinal = new DFAState(name);
-        newFinal.toggleFinal();
         F.add(newFinal);
-        //addState(newFinal.getName()); // TODO: DON'T REMOVE - TESTING
-        Q.add(newFinal); // TESTING
+        if (!Q.contains(getState(name))) {
+            Q.add(newFinal);
+        }
     }
 
     // ****** HELPER METHODS ******
@@ -65,6 +62,7 @@ public class DFA implements DFAInterface {
     /**
      * Looks for the specified DFAState in Q, the set of states
      *
+     * @author JoshSchriger BrayanSilva
      * @param name is the label of the state we're looking for
      * @return DFAState that's name matches the string or null
      */
@@ -76,9 +74,6 @@ public class DFA implements DFAInterface {
         }
         return null;
     }
-
-    // ****** HELPER METHODS ******
-
 
     /**
      * Adds the transition to the DFA's delta data structure and builds the Alphabet, sigma
@@ -94,7 +89,7 @@ public class DFA implements DFAInterface {
         if (Q.toString().contains(fromState) && Q.toString().contains(toState)) {
             DFAState state = getState(toState);
             delta.put(transition, state);   // adding transition
-            sigma.add(onSymb);              // builds Alphabet
+            sigma.add(onSymb);              // builds alphabet
         }
     }
 
@@ -148,17 +143,11 @@ public class DFA implements DFAInterface {
             currState = (DFAState) getToState(currState, s.charAt(i));
         }
 
-        // TODO: DON'T DELETE, for some reason the for each loop breaks the complement
-//        for (DFAState state : F) {
-//            if (state.getName().equals(currState.getName())) {
-//                return true;
-//            }
-//        }
-
-        if(F.contains(currState)) {
-            return true;
+        for (DFAState state : F) {
+            if (state.getName().equals(currState.getName())) {
+                return true;
+            }
         }
-
         return false;
     }
 
@@ -192,22 +181,27 @@ public class DFA implements DFAInterface {
         C_DFA.sigma = this.sigma;   // same Alphabet
         C_DFA.delta = this.delta;   // same transitions
 
-        // change final states
+        // assigns all non-final states from DFA to C_DFA
         for (DFAState s : Q) {
             if (!F.contains(s)) {
                 C_DFA.F.add(s);
             }
         }
-
         return C_DFA;
     }
 
+    /**
+     * Uses the data of the DFA to create a formatted string of the
+     * DFA's 5-tuple i.e., (Q,Σ,δ,q0,F).
+     *
+     * @return formatted String of the DFA's 5-tuple
+     */
     public String toString() {
         StringBuilder sb = new StringBuilder();
 
         sb.append("Q = { ");
         for (DFAState s : Q)
-            sb.append(s.toString()).append(" ");
+            sb.append(s.getName()).append(" ");
         sb.append("}\n");
 
         sb.append("Sigma = { ");
@@ -223,7 +217,7 @@ public class DFA implements DFAInterface {
 
         for (DFAState s : Q) {
             sb.append("\t\t");
-            sb.append(s.toString()).append("\t\t");
+            sb.append(s.getName()).append("\t\t");
             for (char c : sigma)
                 sb.append(getToState(s, c)).append("\t\t");
             sb.append("\n");
@@ -233,7 +227,7 @@ public class DFA implements DFAInterface {
 
         sb.append("F = { ");
         for (DFAState c : F)
-            sb.append(c.toString()).append(" ");
+            sb.append(c.getName()).append(" ");
         sb.append("}\n");
 
         return sb.toString();
